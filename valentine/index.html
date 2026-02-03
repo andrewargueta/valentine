@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Be My Valentine 💖</title>
+
+    <!-- Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: "Poppins", "Comic Sans MS", sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #ffd6e8, #ffeef5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+      }
+
+      .card {
+        background: white;
+        width: 520px;
+        min-height: 360px;
+        padding: 60px 50px;
+        border-radius: 36px;
+        text-align: center;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.18);
+        position: relative;
+      }
+
+      .emoji {
+        font-size: 80px;
+        margin-bottom: 24px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 50px;
+      }
+
+      .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        position: relative;
+      }
+
+      button {
+        border: none;
+        padding: 16px 30px;
+        border-radius: 999px;
+        font-size: 17px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        white-space: nowrap;
+      }
+
+      #yesBtn {
+        background: #ff4d88;
+        color: white;
+        z-index: 2;
+      }
+
+      #yesBtn:hover {
+        transform: scale(1.1);
+      }
+
+      #noBtn {
+        background: #ccc;
+        color: #555;
+        pointer-events: none; /* NEVER CLICKABLE */
+        transition: left 0.3s ease-out, top 0.3s ease-out;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="card" id="card">
+      <div class="emoji">🐣💗</div>
+      <h1>Will you be my Valentine?</h1>
+
+      <div class="buttons" id="buttons">
+        <button id="yesBtn">Yes 💖</button>
+        <button id="noBtn">No 🙃</button>
+      </div>
+
+    </div>
+
+    <script>
+      const noBtn = document.getElementById("noBtn");
+      const yesBtn = document.getElementById("yesBtn");
+
+      let escaped = false;
+      const padding = 20;
+      const fleeDistance = 90;
+      const triggerRadius = 140;
+
+      function moveNoButtonAway(fromX, fromY) {
+        if (!escaped) {
+          const rect = noBtn.getBoundingClientRect();
+          noBtn.style.position = "fixed";
+          noBtn.style.left = rect.left + "px";
+          noBtn.style.top = rect.top + "px";
+          escaped = true;
+        }
+
+        const noRect = noBtn.getBoundingClientRect();
+        const cx = noRect.left + noRect.width / 2;
+        const cy = noRect.top + noRect.height / 2;
+
+        const dx = cx - fromX;
+        const dy = cy - fromY;
+        const dist = Math.hypot(dx, dy) || 1;
+        const newCenterX = cx + (dx / dist) * fleeDistance;
+        const newCenterY = cy + (dy / dist) * fleeDistance;
+
+        const minX = padding;
+        const maxX = window.innerWidth - noRect.width - padding;
+        const minY = padding;
+        const maxY = window.innerHeight - noRect.height - padding;
+
+        let left = newCenterX - noRect.width / 2;
+        let top = newCenterY - noRect.height / 2;
+
+        const yesRect = yesBtn.getBoundingClientRect();
+        const overlap = (l, t) =>
+          l + noRect.width >= yesRect.left - 10 &&
+          l <= yesRect.right + 10 &&
+          t + noRect.height >= yesRect.top - 10 &&
+          t <= yesRect.bottom + 10;
+
+        if (overlap(left, top)) {
+          left = left < yesRect.left ? left - noRect.width - 20 : yesRect.right + 20;
+          top = Math.max(minY, Math.min(maxY, top));
+        }
+
+        left = Math.max(minX, Math.min(maxX, left));
+        top = Math.max(minY, Math.min(maxY, top));
+
+        noBtn.style.left = `${left}px`;
+        noBtn.style.top = `${top}px`;
+      }
+
+      document.addEventListener("mousemove", (e) => {
+        const rect = noBtn.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const distance = Math.hypot(e.clientX - cx, e.clientY - cy);
+        if (distance < triggerRadius) moveNoButtonAway(e.clientX, e.clientY);
+      });
+
+      document.addEventListener("touchstart", (e) => {
+        const t = e.touches[0];
+        const rect = noBtn.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const distance = Math.hypot(t.clientX - cx, t.clientY - cy);
+        if (distance < triggerRadius * 1.5) moveNoButtonAway(t.clientX, t.clientY);
+      });
+
+      // YES = HEART ATTACK
+      yesBtn.addEventListener("click", () => {
+        const end = Date.now() + 3500;
+
+        (function frame() {
+          confetti({
+            particleCount: 12,
+            spread: 90,
+            colors: ["#ff4d88", "#ff99bb", "#ffccd9"],
+          });
+          if (Date.now() < end) requestAnimationFrame(frame);
+        })();
+      });
+    </script>
+  </body>
+</html>
